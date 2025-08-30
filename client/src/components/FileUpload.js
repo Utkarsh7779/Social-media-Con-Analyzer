@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileText, Image, AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
+import { apiBaseUrl } from '../config';
 
 const FileUpload = ({
   onAnalysisComplete,
@@ -34,7 +35,7 @@ const FileUpload = ({
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`${apiBaseUrl}/api/upload`, {
         method: 'POST',
         body: formData,
       });

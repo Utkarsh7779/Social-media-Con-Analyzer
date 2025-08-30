@@ -1,0 +1,22 @@
+Sample Social Media Content for Testing
+
+This is a sample document that demonstrates the capabilities of the Social Media Content Analyzer. You can use this text to test the application's analysis features.
+
+The analyzer will process this content and provide:
+- Word count and sentence structure analysis
+- Readability scoring using the Flesch Reading Ease formula
+- Engagement suggestions for social media optimization
+- Content improvement recommendations
+
+Key features to test:
+1. Text extraction and processing
+2. Statistical analysis
+3. Readability scoring
+4. Engagement suggestions
+5. Content optimization tips
+
+This sample content includes various sentence lengths and complexity levels to showcase the analyzer's capabilities. The system will identify areas for improvement and suggest ways to enhance engagement on social media platforms.
+
+Remember to test with both PDF files and images to experience the full range of functionality, including OCR processing for scanned documents and image files.
+
+#SocialMedia #ContentAnalysis #Engagement #Optimization

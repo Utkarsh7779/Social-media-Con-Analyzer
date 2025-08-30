@@ -1,0 +1,19 @@
+{
+  "name": "social-media-content-analyzer",
+  "version": "1.0.0",
+  "description": "A social media content analyzer that extracts text from PDFs and images using OCR",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["social media", "content analysis", "OCR", "PDF parsing"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

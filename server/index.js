@@ -64,41 +64,115 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    // Check file size before processing
+    if (req.file.size > 5 * 1024 * 1024) { // 5MB limit for free tier
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ 
+        error: 'File too large for free tier. Please use files under 5MB or upgrade your plan.' 
+      });
+    }
+
     const filePath = req.file.path;
     const fileType = path.extname(req.file.originalname).toLowerCase();
     let extractedText = '';
     let analysis = {};
 
-    if (fileType === '.pdf') {
-      // Handle PDF files
-      const dataBuffer = fs.readFileSync(filePath);
-      const pdfData = await pdfParse(dataBuffer);
-      extractedText = pdfData.text;
-      analysis = analyzeContent(extractedText);
-    } else {
-      // Handle image files with OCR
-      const { data: { text } } = await Tesseract.recognize(filePath, 'eng', {
-        logger: m => console.log(m)
+    // Set timeout for processing
+    const processingTimeout = setTimeout(() => {
+      console.error('Processing timeout - file too complex');
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return res.status(408).json({ 
+        error: 'Processing timeout. File may be too complex for free tier.' 
       });
-      extractedText = text;
-      analysis = analyzeContent(extractedText);
+    }, 30000); // 30 second timeout
+
+    try {
+      if (fileType === '.pdf') {
+        // Handle PDF files with memory management
+        const dataBuffer = fs.readFileSync(filePath);
+        const pdfData = await pdfParse(dataBuffer);
+        extractedText = pdfData.text;
+        
+        // Limit text length for free tier
+        if (extractedText.length > 10000) {
+          extractedText = extractedText.substring(0, 10000) + '... (truncated for free tier)';
+        }
+        
+        analysis = analyzeContent(extractedText);
+      } else {
+        // Handle image files with OCR and memory limits
+        const { data: { text } } = await Tesseract.recognize(filePath, 'eng', {
+          logger: m => console.log(m),
+          workerOptions: {
+            workerPath: undefined,
+            corePath: undefined,
+            langPath: undefined,
+            cachePath: undefined,
+            dataPath: undefined,
+            gzip: false
+          }
+        });
+        
+        extractedText = text;
+        
+        // Limit text length for free tier
+        if (extractedText.length > 5000) {
+          extractedText = extractedText.substring(0, 5000) + '... (truncated for free tier)';
+        }
+        
+        analysis = analyzeContent(extractedText);
+      }
+
+      // Clear timeout since processing succeeded
+      clearTimeout(processingTimeout);
+
+      // Clean up uploaded file
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      res.json({
+        success: true,
+        originalName: req.file.originalname,
+        extractedText,
+        analysis,
+        note: 'Free tier: Processing limited for optimal performance'
+      });
+
+    } catch (processingError) {
+      clearTimeout(processingTimeout);
+      throw processingError;
     }
-
-    // Clean up uploaded file
-    fs.unlinkSync(filePath);
-
-    res.json({
-      success: true,
-      originalName: req.file.originalname,
-      extractedText,
-      analysis
-    });
 
   } catch (error) {
     console.error('Error processing file:', error);
-    res.status(500).json({ 
-      error: 'Error processing file',
-      details: error.message 
+    
+    // Clean up file if it exists
+    if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    
+    // Provide more specific error messages
+    let errorMessage = 'Error processing file';
+    let statusCode = 500;
+    
+    if (error.message.includes('timeout')) {
+      errorMessage = 'Processing timeout - file too complex';
+      statusCode = 408;
+    } else if (error.message.includes('memory')) {
+      errorMessage = 'Memory limit exceeded - file too large or complex';
+      statusCode = 413;
+    } else if (error.message.includes('ENOENT')) {
+      errorMessage = 'File processing error - please try again';
+      statusCode = 500;
+    }
+    
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      details: error.message,
+      suggestion: 'Try a smaller file or upgrade to a paid plan for better performance'
     });
   }
 });
@@ -193,7 +267,22 @@ function generateSuggestions(text, avgWordsPerSentence, readabilityScore) {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  const memUsage = process.memoryUsage();
+  const memUsageMB = {
+    rss: Math.round(memUsage.rss / 1024 / 1024 * 100) / 100,
+    heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024 * 100) / 100,
+    heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024 * 100) / 100,
+    external: Math.round(memUsage.external / 1024 / 1024 * 100) / 100
+  };
+  
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    memory: memUsageMB,
+    uptime: process.uptime(),
+    platform: process.platform,
+    nodeVersion: process.version
+  });
 });
 
 // Error handling middleware

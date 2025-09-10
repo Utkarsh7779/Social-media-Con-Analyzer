@@ -52,25 +52,32 @@ A modern web application that analyzes social media content by extracting text f
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### 🎯 **For Project Submission (Recommended)**
+1. **Double-click** `start-local.bat` (Windows)
+2. **Wait** for both services to start
+3. **Open** http://localhost:3000 in your browser
+4. **Test** with sample files for reliable demonstration
+
+### 🔧 **Manual Development Setup**
+1. **Clone the Repository**
 ```bash
 git clone <your-repo-url>
 cd social-media-content-analyzer
 ```
 
-### 2. Install Dependencies
+2. **Install Dependencies**
 ```bash
 npm run install-all
 ```
 
-### 3. Start Development Servers
+3. **Start Development Servers**
 ```bash
 npm run dev
 ```
 
 This will start both the backend server (port 5000) and frontend development server (port 3000).
 
-### 4. Open Your Browser
+4. **Open Your Browser**
 Navigate to `http://localhost:3000` to use the application.
 
 ## 📁 Project Structure

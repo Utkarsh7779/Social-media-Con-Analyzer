@@ -20,25 +20,12 @@ Your backend is a Node.js/Express server with file upload, OCR, and PDF processi
    - **Start Command:** `npm start`
    - **Plan:** Free (or paid for better performance)
 
-### Step 3: Environment Variables
-Add these in Render dashboard:
-- `PORT` (Render sets this automatically)
-- `NODE_ENV=production`
 
 ### Step 4: Deploy
 Click "Create Web Service" and wait for deployment.
 
 ---
 
-## 🚂 **Alternative: Railway**
-
-### Step 1: Deploy on Railway
-1. Go to [railway.app](https://railway.app)
-2. Connect your GitHub repository
-3. Select the `server` directory
-4. Railway will auto-detect Node.js and deploy
-
----
 
 ## ⚠️ **Important Deployment Considerations**
 

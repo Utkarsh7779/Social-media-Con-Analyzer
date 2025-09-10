@@ -1,10 +1,8 @@
 // API Configuration
 const config = {
-  // Development environment
   development: {
     apiBaseUrl: 'http://localhost:5000'
   },
-  // Production environment
   production: {
     apiBaseUrl: 'https://social-media-con-analyzer-1.onrender.com'
   }
